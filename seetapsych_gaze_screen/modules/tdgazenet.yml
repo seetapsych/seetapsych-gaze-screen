@@ -1,0 +1,96 @@
+version: '1.0'
+module:
+  uid: 553cdb9e-eb89-4448-8925-cd94235ab933
+  name: OpenGaze
+  version: '1.0'
+  description: 'Open-source gaze estimation toolkit providing screen gaze coordinates from facial landmarks or mesh.'
+  keywords:
+    - Face
+    - Gaze
+    - Screen Gaze
+    - 3D Face Prior
+  requirements:
+    - seetapsych-gaze-screen
+    - mmengine>=0.10.7
+    - opencv-python>=4.11.0.86
+    - pillow>=12.2.0
+    - safetensors>=0.7.0
+    - timm>=1.0.26
+    - torch>=2.9.1
+    - torchvision>=0.24.1
+    - mediapipe>=0.10.33
+  refs:
+    - name: open-gaze-estimation
+      repo: https://github.com/Elorfiniel/open-gaze-estimation-2025-release
+packages:
+  - uid: 17c5187c-beb1-4e7d-a0a7-da2638d679bd
+    name: GazeScreen-TDGazeNet(OpenGaze)
+    description: High-accuracy gaze estimation via TdGazeNet with 3D face prior, camera intrinsics and multi-task head; outputs distinct per-eye gaze vectors for left and right eye. Highest accuracy among OpenGaze variants at the cost of heavier compute.
+    version: '1.0'
+    priority: 10
+    usage_models: []
+    inputs: []
+    provides:
+      - face/gaze_screen
+    requires:
+      - face/mesh
+    entry:
+      method: seetapsych_gaze_screen.opengaze.tdgazenet.package.load
+    parameters:
+      - name: optimize
+        type: selection
+        value: none
+        selection: [none, reparameterize]
+        text: Backbone Optimization
+        description: Post-load structural optimization of the backbone. Set to reparameterize to fold BatchNorm into convolutions for faster inference at load-time cost; use none for training or debug workflows where exact weights must be preserved.
+      - name: data
+        type: object
+        value:
+          model:
+            backbone: fastvit-sa12
+            fusion: adaptive
+            reg_head: multi-task
+            n_face_kpts: 151
+            n_eyes_kpts: 110
+          pre_process:
+            image_size: [224, 224]
+            bbox_scale: 1.1
+            norm_mean: [0.485, 0.456, 0.406]
+            norm_std: [0.229, 0.224, 0.225]
+          post_process:
+            gaze_source: gaze
+            epsilon: 1.e-9
+            disp_margin: 80
+          intrinsic:
+            - [1244.44, 0.0, 800.0]
+            - [0.0, 1244.44, 800.0]
+            - [0.0, 0.0, 1.0]
+          camera:
+            capture_id: 0
+            frame_h: 720
+            frame_w: 1280
+            intrinsic:
+              - [972.01, 0.0, 652.68]
+              - [0.0, 972.35, 373.91]
+              - [0.0, 0.0, 1.0]
+            extrinsic:
+              - [-1.0, 0.0, 0.0, 155.0]
+              - [0.0, 1.0, 0.0, 5.0]
+              - [0.0, 0.0, -1.0, 2.5]
+            distortion: [0.123508, -0.334222, -0.002206, 0.000207, 0.199979]
+          screen:
+            h_px: 1080
+            w_px: 1920
+            h_mm: 174
+            w_mm: 310
+        text: Model Topology, Camera and Calibration Settings
+        description: Model topology, camera/screen calibration and image preprocessing settings. camera intrinsic/extrinsic/distortion matrices and screen physical dimensions must match the real setup for the 3D-face-prior projection to be accurate; image_size and bbox_scale tune face crop resolution vs. context margin.
+    models:
+      - uid: 79f7c1ea-d286-4a56-bc6e-b5eb2977aff0
+        name: opengeze-tdgazenet.safetensors
+        version: '1.0'
+        recommended: true
+        download:
+          index: opengeze-tdgazenet.safetensors
+          sha256: 709f253fef7e7e4b80719f7c48174efb3cbe8e567364bb8a5e9e8dc578914196
+          url: https://www.modelscope.cn/models/seetapsych/seetapsych-models/resolve/master/seetapsych/gaze-screen/opengeze-tdgazenet.safetensors

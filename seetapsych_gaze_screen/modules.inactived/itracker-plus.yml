@@ -1,0 +1,70 @@
+version: '1.0'
+module:
+  uid: 7f62576e-25f2-4b2d-b637-668aaee36fc9
+  name: OpenGaze
+  version: '1.0'
+  description: 'Open-source gaze estimation toolkit providing screen gaze coordinates from facial landmarks or mesh.'
+  keywords:
+    - Face
+    - Gaze
+    - Screen Gaze
+    - Lightweight
+  requirements:
+    - seetapsych-gaze-screen
+    - opencv-python>=4.11.0.86
+    - pillow>=12.2.0
+    - timm>=1.0.26
+    - torch>=2.9.1
+    - torchvision>=0.24.1
+    - onnx>=1.20.1
+    - onnxruntime>=1.24; sys_platform == 'darwin' and python_version > '3.10'
+    - onnxruntime<1.24; sys_platform == 'darwin' and python_version <= '3.10'
+    - onnxruntime-gpu>=1.24; sys_platform != 'darwin' and python_version > '3.10'
+    - onnxruntime-gpu<1.24; sys_platform != 'darwin' and python_version <= '3.10'
+  refs:
+    - name: open-gaze-estimation
+      repo: https://github.com/Elorfiniel/open-gaze-estimation-2025-release
+packages:
+  - uid: 981181f8-86f6-43c0-afea-8b42fc5beb26
+    name: GazeScreen-ITrackerPlus(OpenGaze)
+    description: Lightweight eye-and-face gaze point estimation; outputs one shared gaze vector applied to both eyes. Best for resource-constrained devices or real-time low-latency use cases with acceptable accuracy.
+    version: '1.0'
+    priority: 20
+    usage_models: []
+    inputs: []
+    provides:
+      - face/gaze_screen
+    requires:
+      - face/mesh
+    entry:
+      method: seetapsych_gaze_screen.opengaze.itracker_plus.package.load
+    parameters:
+      - name: data
+        type: object
+        value:
+          pre_process:
+            adjust_size: [480, 640]
+            norm_mean: [0.485, 0.456, 0.406]
+            norm_std: [0.229, 0.224, 0.225]
+          post_process:
+            disp_margin: 80
+          camera:
+            capture_id: 0
+            frame_h: 720
+            frame_w: 1280
+            screen_x_mm: -155
+            screen_y_mm: -5
+          screen:
+            h_px: 1080
+            w_px: 1920
+            h_mm: 174
+            w_mm: 310
+        text: Camera, Screen and Pre-processing Settings
+        description: Camera/screen calibration and image preprocessing settings. camera and screen physical dimensions (mm/px) and sensor frame size must match the real setup for accurate gaze projection; adjust_size resizes input for throughput, larger increases accuracy but slows inference.
+    models:
+      - uid: 18a5023a-42ad-4ea9-81a9-f35fb57b9342
+        name: opengaze-itrackerplus.onnx
+        version: '1.0'
+        recommended: true
+        entry:
+          method: seetapsych_gaze_screen.opengaze.itracker_plus.model.load
