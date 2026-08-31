@@ -17,6 +17,7 @@ from opengaze.utils.geom import PoseEstimator
 from PIL import Image
 from seetapsych_lib import api
 
+from ..utils.merge import deep_merge
 from .tddfa import SparseFaceLandmarks
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -455,6 +456,23 @@ class Instance(api.Instance):
         demo_data: dict[str, Any],
         device: api.Device,
     ):
+        demo_data = deep_merge(
+            {
+                "pre_process": {"norm_mean": [0.485, 0.456, 0.406], "norm_std": [0.229, 0.224, 0.225]},
+                "post_process": {"epsilon": 1e-9, "disp_margin": 80},
+                "camera": {
+                    "capture_id": 0,
+                    "frame_h": 720,
+                    "frame_w": 1280,
+                    "intrinsic": [[972.01, 0.0, 652.68], [0.0, 972.35, 373.91], [0.0, 0.0, 1.0]],
+                    "extrinsic": [[-1.0, 0.0, 0.0, 155.0], [0.0, 1.0, 0.0, 5.0], [0.0, 0.0, -1.0, 2.5]],
+                    "distortion": [0.123508, -0.334222, -0.002206, 0.000207, 0.199979],
+                },
+                "screen": {"h_px": 1080, "w_px": 1920, "h_mm": 174.0, "w_mm": 310.0},
+            },
+            demo_data,
+        )
+
         torch_device = torch.device(str(device))
         model = load_wrapped_model(demo_data, model_path, torch_device)
 
@@ -487,7 +505,7 @@ class Instance(api.Instance):
 
             success = result_dict["success"]
             gaze_screen_px = result_dict["gaze_s"].tolist() if success else []
-            gaze_cm = result_dict["gaze_c"].tolist() if success else []
+            gaze_camera_mm = result_dict["gaze_c"].tolist() if success else []
 
             face_gaze_screen.append(
                 {
@@ -497,9 +515,9 @@ class Instance(api.Instance):
                             "left_eye": gaze_screen_px,
                             "right_eye": gaze_screen_px,
                         },
-                        "gaze_cm": {
-                            "left_eye": gaze_cm,
-                            "right_eye": gaze_cm,
+                        "gaze_camera_mm": {
+                            "left_eye": gaze_camera_mm,
+                            "right_eye": gaze_camera_mm,
                         },
                     }
                 }

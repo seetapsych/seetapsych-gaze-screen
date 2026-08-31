@@ -17,6 +17,8 @@ from opengaze.utils.image import scaled_crop
 from PIL import Image
 from seetapsych_lib import api
 
+from ..utils.merge import deep_merge
+
 
 # Data Transformations, Model Inference and Result Display
 class FrameConsumer:
@@ -492,6 +494,36 @@ def load_wrapped_model(
 
 class Instance(api.Instance):
     def __init__(self, model_path: str, demo_data: dict[str, Any], optimize: str, device: api.Device):
+        demo_data = deep_merge(
+            {
+                "model": {
+                    "backbone": "fastvit-sa12",
+                    "fusion": "adaptive",
+                    "reg_head": "multi-task",
+                    "n_face_kpts": 151,
+                    "n_eyes_kpts": 110,
+                },
+                "pre_process": {
+                    "image_size": [224, 224],
+                    "bbox_scale": 1.1,
+                    "norm_mean": [0.485, 0.456, 0.406],
+                    "norm_std": [0.229, 0.224, 0.225],
+                },
+                "post_process": {"gaze_source": "gaze", "epsilon": 1e-9, "disp_margin": 80},
+                "intrinsic": [[1244.44, 0.0, 800.0], [0.0, 1244.44, 800.0], [0.0, 0.0, 1.0]],
+                "camera": {
+                    "capture_id": 0,
+                    "frame_h": 720,
+                    "frame_w": 1280,
+                    "intrinsic": [[972.01, 0.0, 652.68], [0.0, 972.35, 373.91], [0.0, 0.0, 1.0]],
+                    "extrinsic": [[-1.0, 0.0, 0.0, 155.0], [0.0, 1.0, 0.0, 5.0], [0.0, 0.0, -1.0, 2.5]],
+                    "distortion": [0.123508, -0.334222, -0.002206, 0.000207, 0.199979],
+                },
+                "screen": {"h_px": 1080, "w_px": 1920, "h_mm": 174.0, "w_mm": 310.0},
+            },
+            demo_data,
+        )
+
         torch_device = torch.device(str(device))
         model = load_wrapped_model(demo_data, model_path, torch_device, optimize)
 
@@ -522,7 +554,7 @@ class Instance(api.Instance):
                                 "left_eye": [],
                                 "right_eye": [],
                             },
-                            "gaze_cm": {
+                            "gaze_camera_mm": {
                                 "left_eye": [],
                                 "right_eye": [],
                             },
@@ -540,8 +572,8 @@ class Instance(api.Instance):
             success = result_dict["success"]
             gaze_screen_px_left = result_dict["leye_gaze_s"].tolist() if success else []
             gaze_screen_px_right = result_dict["reye_gaze_s"].tolist() if success else []
-            gaze_cm_left = result_dict["leye_gaze_c"].tolist() if success else []
-            gaze_cm_right = result_dict["reye_gaze_c"].tolist() if success else []
+            gaze_camera_mm_left = result_dict["leye_gaze_c"].tolist() if success else []
+            gaze_camera_mm_right = result_dict["reye_gaze_c"].tolist() if success else []
 
             face_gaze_screen.append(
                 {
@@ -551,9 +583,9 @@ class Instance(api.Instance):
                             "left_eye": gaze_screen_px_left,
                             "right_eye": gaze_screen_px_right,
                         },
-                        "gaze_cm": {
-                            "left_eye": gaze_cm_left,
-                            "right_eye": gaze_cm_right,
+                        "gaze_camera_mm": {
+                            "left_eye": gaze_camera_mm_left,
+                            "right_eye": gaze_camera_mm_right,
                         },
                     }
                 }

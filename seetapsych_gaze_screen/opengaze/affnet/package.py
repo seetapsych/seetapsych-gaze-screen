@@ -15,6 +15,8 @@ from opengaze.utils.gc import FaceAlignment, FaceLandmarks
 from PIL import Image
 from seetapsych_lib import api
 
+from ..utils.merge import deep_merge
+
 
 # Data Transformations, Model Inference and Result Display
 class FrameConsumer:
@@ -350,6 +352,26 @@ def load_wrapped_model(demo_data: dict, state_dict_file: str, device: torch.devi
 
 class Instance(api.Instance):
     def __init__(self, model_path: str, demo_data: dict[str, Any], device: api.Device):
+        demo_data = deep_merge(
+            {
+                "pre_process": {
+                    "adjust_size": [480, 640],
+                    "norm_mean": [0.485, 0.456, 0.406],
+                    "norm_std": [0.229, 0.224, 0.225],
+                },
+                "post_process": {"disp_margin": 80},
+                "camera": {
+                    "capture_id": 0,
+                    "frame_h": 720,
+                    "frame_w": 1280,
+                    "screen_x_mm": -155.0,
+                    "screen_y_mm": -5.0,
+                },
+                "screen": {"h_px": 1080, "w_px": 1920, "h_mm": 174.0, "w_mm": 310.0},
+            },
+            demo_data,
+        )
+
         torch_device = torch.device(str(device))
         model = load_wrapped_model(demo_data, model_path, torch_device)
 
@@ -385,7 +407,7 @@ class Instance(api.Instance):
                                 "left_eye": [],
                                 "right_eye": [],
                             },
-                            "gaze_cm": {
+                            "gaze_camera_mm": {
                                 "left_eye": [],
                                 "right_eye": [],
                             },
@@ -402,7 +424,7 @@ class Instance(api.Instance):
 
             success = result_dict["success"]
             gaze_screen_px = result_dict["gaze_s"].tolist() if success else []
-            gaze_cm = result_dict["gaze_c"].tolist() if success else []
+            gaze_camera_mm = result_dict["gaze_c"].tolist() if success else []
 
             face_gaze_screen.append(
                 {
@@ -412,9 +434,9 @@ class Instance(api.Instance):
                             "left_eye": gaze_screen_px,
                             "right_eye": gaze_screen_px,
                         },
-                        "gaze_cm": {
-                            "left_eye": gaze_cm,
-                            "right_eye": gaze_cm,
+                        "gaze_camera_mm": {
+                            "left_eye": gaze_camera_mm,
+                            "right_eye": gaze_camera_mm,
                         },
                     }
                 }

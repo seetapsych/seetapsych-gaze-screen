@@ -40,16 +40,7 @@ packages:
       - name: data
         type: object
         value:
-          pre_process:
-            adjust_size: [480, 640]
-            norm_mean: [0.485, 0.456, 0.406]
-            norm_std: [0.229, 0.224, 0.225]
-          post_process:
-            disp_margin: 80
           camera:
-            capture_id: 0
-            frame_h: 720
-            frame_w: 1280
             screen_x_mm: -155
             screen_y_mm: -5
           screen:
