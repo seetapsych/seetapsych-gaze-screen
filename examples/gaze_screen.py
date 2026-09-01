@@ -66,16 +66,17 @@ def main():
         },
     }
 
-    factory = Factory()
+    factory = Factory(disable_default=True)
     for root in module_roots:
         factory.load_dir_modules(root)
+
+    factory.load_default_modules()
 
     pipeline = Pipeline(
         factory,
         packages=[
             "ee7b0a24-c4b3-470d-b095-9c606384d06e",  # AFFNet
-            # '981181f8-86f6-43c0-afea-8b42fc5beb26', # ITrackerPlus
-            # '17c5187c-beb1-4e7d-a0a7-da2638d679bd', # TdGazeNet
+            # "17c5187c-beb1-4e7d-a0a7-da2638d679bd", # TdGazeNet
         ],
         attributes=[
             # 'face/gaze_screen'
