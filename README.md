@@ -118,6 +118,11 @@ Screen physical dimensions and pixel resolution are used to convert between came
 | `screen.w_mm` | int | `310` | Screen width in physical millimeters (measured on the active display area). |
 | `screen.h_mm` | int | `174` | Screen height in physical millimeters. |
 
+<figure style="text-align:center;">
+  <img src="assets/screen-resolution.jpg" alt="Screen physical dimensions and pixel resolution diagram" height="280">
+  <figcaption><strong>Figure 1.</strong> Screen physical dimensions and resolution — common to both Layout A and Layout B. The diagram shows where to measure <code>screen.w_mm</code> (active display width in mm), <code>screen.h_mm</code> (active display height in mm), and how <code>screen.w_px × screen.h_px</code> (e.g. 1920 × 1080 px) maps to the physical area. These four values determine the mm↔pixel conversion factor for projecting gaze points onto screen coordinates; incorrect values will shift the estimated gaze by a proportional scaling error. For TDGazeNet (Layout B), accurate screen dimensions are especially critical because the 3D-face-prior projection relies on the metric screen plane to intersect gaze rays.</figcaption>
+</figure>
+
 ### Layout A — Simple camera offset (AFFNet)
 
 Used by algorithms that estimate gaze in the camera coordinate frame directly, then project it onto the screen plane from a known relative position. No per-pixel lens distortion is applied; if your camera has strong distortion, undistort frames before feeding them into the pipeline.
@@ -141,6 +146,11 @@ Used by algorithms that estimate gaze in the camera coordinate frame directly, t
 |---|---|---|---|
 | `camera.screen_x_mm` | float | `-155` | Horizontal offset from the camera optical center to the screen origin (top-left corner of the active display area), **in millimeters along the camera X-axis**. Sign convention: **right = positive, left = negative**. A typical laptop webcam sits above the screen center; the screen therefore lies to the left of the camera, producing a negative value. |
 | `camera.screen_y_mm` | float | `-5` | Vertical offset from the camera optical center to the screen origin, **in millimeters along the camera Y-axis**. Sign convention: **up = positive, down = negative**. With the webcam mounted on the top bezel the screen sits slightly below the camera, so this value is usually slightly negative or close to zero. |
+
+<figure style="text-align:center;">
+  <img src="assets/screen-and-camera.jpg" alt="Layout A camera-to-screen offset diagram" height="320">
+  <figcaption><strong>Figure 2.</strong> Layout A — camera–screen geometry. The diagram illustrates how <code>camera.screen_x_mm</code> and <code>camera.screen_y_mm</code> measure the signed offset from the camera optical center to the screen origin <em>S</em> (top-left corner of the active display area), together with the screen physical dimensions <code>screen.w_mm</code>/<code>screen.h_mm</code> and pixel resolution used for mm↔px conversion. Use this as a visual reference when taking physical measurements for the AFFNet configuration.</figcaption>
+</figure>
 
 ### Layout B — Full camera calibration (TDGazeNet)
 
@@ -174,10 +184,29 @@ Used by algorithms that leverage a 3D face prior. They require explicit camera i
 |---|---|---|---|
 | `camera.intrinsic` | `list[list[float]]` | 3 × 3 | Pinhole camera intrinsic matrix `[[fx, 0, cx], [0, fy, cy], [0, 0, 1]]`. `fx`, `fy` are focal lengths in pixels; `cx`, `cy` is the principal point in pixels. |
 | `camera.distortion` | `list[float]` | 5 | OpenCV 5-parameter distortion coefficients `[k1, k2, p1, p2, k3]` in the usual radial + tangential order. Leave as all zeros for an approximately distortion-free lens (e.g. a factory-calibrated industrial camera). |
-| `camera.extrinsic` | `list[list[float]]` | 3 × 4 | Screen-to-camera rigid transform `[R \| t]` written in row-major form. The 3×3 block `R` rotates screen-coordinate axes into camera axes; the 3×1 vector `t` is the position of the **screen origin** expressed **in the camera frame**, in millimeters. For a typical webcam sitting above the screen center, `t` follows the same sign convention as Layout A: left / below ⇒ negative X / Y. The default `R = diag(-1, 1, -1)` flips axes so that screen right/down map to camera left/up (matches the webcam-in-front-of-screen mounting). |
+| `camera.extrinsic` | `list[list[float]]` | 3 × 4 | Screen-to-camera rigid transform `[R \| t]` in row-major form. 3×3 `R` rotates screen axes into camera axes; 3×1 `t` is the screen origin (top-left of the active display area) in the camera frame, mm. Default `R = diag(-1, 1, -1)` matches the standard webcam-in-front-of-screen mounting. Sign conventions and measurement guide: see [`data.camera.extrinsic`](#datacameraextrinsic) below. |
 
+### `data.camera.extrinsic`
 
+The camera extrinsic matrix. For the current implementation, **only the translation vector** $t = [t_x, t_y, t_z]^T$, i.e. the last column of the matrix, needs to be adjusted for the actual camera–screen setup. Leave the other entries unchanged.
 
+The translation vector $t$ gives the position of the **top-left corner of the active display area** in the camera coordinate system, in millimeters.
+
+The camera coordinate system is centered at the **camera optical center**:
+
+- **+X** points to the right in the camera image (to the user's left when facing the monitor).
+- **+Y** points downward.
+- **+Z** points forward along the camera optical axis, from the camera toward the user.
+
+Measure $t_x$, $t_y$, and $t_z$ as the signed offsets from the camera optical center to the top-left corner of the active display area along these axes.
+
+**Example.** If the camera optical center is horizontally aligned with the center of a $310\,\mathrm{mm}$-wide active display area, the top-left corner is approximately $155\,\mathrm{mm}$ along +X, so $t_x \approx 155\,\mathrm{mm}$. If the top edge of the active display area is $5\,\mathrm{mm}$ below the camera optical center, then $t_y \approx 5\,\mathrm{mm}$. If the display plane is $2.5\,\mathrm{mm}$ along +Z from the camera optical center, then $t_z \approx 2.5\,\mathrm{mm}$.
+
+Thus,
+
+$$
+t \approx [155,\; 5,\; 2.5]^T\ \mathrm{mm}.
+$$
 
 ## References
 

@@ -572,8 +572,8 @@ class Instance(api.Instance):
             success = result_dict["success"]
             gaze_screen_px_left = result_dict["leye_gaze_s"].tolist() if success else []
             gaze_screen_px_right = result_dict["reye_gaze_s"].tolist() if success else []
-            gaze_camera_mm_left = result_dict["leye_gaze_c"].tolist() if success else []
-            gaze_camera_mm_right = result_dict["reye_gaze_c"].tolist() if success else []
+            gaze_camera_mm_left = (result_dict["leye_gaze_c"] * [-1, -1, 1]).tolist() if success else []
+            gaze_camera_mm_right = (result_dict["reye_gaze_c"] * [-1, -1, 1]).tolist() if success else []
 
             face_gaze_screen.append(
                 {

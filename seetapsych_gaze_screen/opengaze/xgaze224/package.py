@@ -505,7 +505,7 @@ class Instance(api.Instance):
 
             success = result_dict["success"]
             gaze_screen_px = result_dict["gaze_s"].tolist() if success else []
-            gaze_camera_mm = result_dict["gaze_c"].tolist() if success else []
+            gaze_camera_mm = (result_dict["gaze_c"] * [-1, -1, 1]).tolist() if success else []
 
             face_gaze_screen.append(
                 {
