@@ -21,7 +21,7 @@ module:
     - mediapipe>=0.10.33
   refs:
     - name: open-gaze-estimation
-      repo: https://github.com/Elorfiniel/open-gaze-estimation-2025-release
+      repo: https://github.com/seetapsych/open-gaze-estimation-2025-release
 packages:
   - uid: 17c5187c-beb1-4e7d-a0a7-da2638d679bd
     name: GazeScreen-TDGazeNet(OpenGaze)
