@@ -703,7 +703,7 @@ name = "cuda-bindings"
 version = "13.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cuda-pathfinder", marker = "sys_platform != 'darwin'" },
+    { name = "cuda-pathfinder", marker = "python_full_version < '3.15' and sys_platform != 'darwin'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a9/21/8464d133752951c154feafb3b65c297e7d80f301183d220bec4c830f1441/cuda_bindings-13.3.1-cp310-cp310-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:120fcc53d57903df529c3486962c56528cba5b7d6c57c99537320ed9922c8b86", size = 6073403, upload-time = "2026-05-29T23:11:36.22Z" },
@@ -2510,7 +2510,7 @@ wheels = [
 [[package]]
 name = "open-gaze-estimation"
 version = "0.1.0"
-source = { git = "https://github.com/Elorfiniel/open-gaze-estimation-2025-release.git#fbd8a7bd0679c765e666093bca99ff396227aea8" }
+source = { git = "https://github.com/seetapsych/open-gaze-estimation-2025-release.git#632818f0bbc35bc9649ed5382291655745d33df4" }
 
 [[package]]
 name = "opencv-contrib-python"
@@ -3579,7 +3579,7 @@ provides-extras = ["all", "dev"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "open-gaze-estimation", git = "https://github.com/Elorfiniel/open-gaze-estimation-2025-release.git" },
+    { name = "open-gaze-estimation", git = "https://github.com/seetapsych/open-gaze-estimation-2025-release.git" },
     { name = "seetapsych-gaze-screen", extras = ["dev"] },
 ]
 

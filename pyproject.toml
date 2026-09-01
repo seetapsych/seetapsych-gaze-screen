@@ -117,7 +117,7 @@ skips = [
 default-groups = ["dev"]
 
 [tool.uv.sources]
-open-gaze-estimation = { git = "https://github.com/Elorfiniel/open-gaze-estimation-2025-release.git" }
+open-gaze-estimation = { git = "https://github.com/seetapsych/open-gaze-estimation-2025-release.git" }
 
 [tool.hatch.version]
 source = "vcs"
