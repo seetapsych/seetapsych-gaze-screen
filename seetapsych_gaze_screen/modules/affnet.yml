@@ -48,8 +48,8 @@ packages:
             w_px: 1920
             h_mm: 174
             w_mm: 310
-        text: Camera, Screen and Pre-processing Settings
-        description: Camera/screen calibration and image preprocessing settings. camera and screen physical dimensions (mm/px) and sensor frame size must match the real setup for accurate gaze projection; adjust_size resizes input for throughput, larger increases accuracy but slows inference.
+        text: Camera–Screen Geometry and Screen Dimensions
+        description: Camera–screen geometry and screen dimensions used to convert the predicted gaze location from camera-centered millimeter coordinates to screen pixel coordinates.
     models:
       - uid: 8b71a543-c977-47ec-8b20-6a8905d547b7
         name: opengaze-affnet-v2.safetensors

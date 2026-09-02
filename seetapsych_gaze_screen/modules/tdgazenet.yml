@@ -62,8 +62,8 @@ packages:
             w_px: 1920
             h_mm: 174
             w_mm: 310
-        text: Model Topology, Camera and Calibration Settings
-        description: Model topology, camera/screen calibration and image preprocessing settings. camera intrinsic/extrinsic/distortion matrices and screen physical dimensions must match the real setup for the 3D-face-prior projection to be accurate; image_size and bbox_scale tune face crop resolution vs. context margin.
+        text: Camera Calibration, Extrinsic Geometry and Screen Dimensions
+        description: Camera intrinsics and distortion (`camera.intrinsic`, `camera.distortion`), camera-to-screen extrinsic geometry (`camera.extrinsic`), and screen dimensions used to project the predicted 3D gaze rays onto the screen and convert the resulting points to screen pixel coordinates. These values should match the actual camera–screen setup.
     models:
       - uid: 79f7c1ea-d286-4a56-bc6e-b5eb2977aff0
         name: opengeze-tdgazenet.safetensors

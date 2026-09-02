@@ -113,10 +113,10 @@ Screen physical dimensions and pixel resolution are used to convert between came
 
 | Field | Type | Example | Description |
 |---|---|---|---|
-| `screen.w_px` | int | `1920` | Screen width in pixels (horizontal resolution). |
-| `screen.h_px` | int | `1080` | Screen height in pixels (vertical resolution). |
-| `screen.w_mm` | int | `310` | Screen width in physical millimeters (measured on the active display area). |
-| `screen.h_mm` | int | `174` | Screen height in physical millimeters. |
+| `screen.w_px` | int   | `1920` | Screen width in pixels (horizontal resolution). |
+| `screen.h_px` | int   | `1080` | Screen height in pixels (vertical resolution). |
+| `screen.w_mm` | float | `310` | Screen width in physical millimeters (measured on the active display area). |
+| `screen.h_mm` | float | `174` | Screen height in physical millimeters. |
 
 <figure style="text-align:center;">
   <img src="https://raw.githubusercontent.com/seetapsych/seetapsych-gaze-screen/main/assets/screen-resolution.jpg" alt="Screen physical dimensions and pixel resolution diagram" height="280">
@@ -154,7 +154,9 @@ Used by algorithms that estimate gaze in the camera coordinate frame directly, t
 
 ### Layout B — Full camera calibration (TDGazeNet)
 
-Used by algorithms that leverage a 3D face prior. They require explicit camera intrinsics, an extrinsic screen-to-camera transform, and OpenCV-format distortion coefficients to lift 2D landmarks back into metric 3D space before projecting the gaze ray onto the screen plane. Run a standard OpenCV/Matlab checkerboard calibration once on your capture setup and paste the matrices here.
+Used by algorithms that leverage a 3D face prior. Camera intrinsics and OpenCV-format distortion coefficients are used for image/landmark undistortion and geometric normalization, while the screen-to-camera extrinsic transform is used to project the predicted 3D gaze rays onto the screen plane.
+
+Obtain `camera.intrinsic` and `camera.distortion` through standard camera calibration, such as OpenCV/Matlab checkerboard calibration. For `camera.extrinsic`, keep the rotation matrix unchanged and estimate or measure only the translation vector `t` from the actual camera–screen geometry, as described below.
 
 ```json
 {
