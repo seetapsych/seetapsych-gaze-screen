@@ -3566,7 +3566,7 @@ requires-dist = [
     { name = "scipy", marker = "extra == 'all'", specifier = ">=1.15.3" },
     { name = "scipy", marker = "extra == 'dev'", specifier = ">=1.15.3" },
     { name = "scipy-stubs", marker = "extra == 'dev'", specifier = ">=1.15.3.0" },
-    { name = "seetapsych-lib" },
+    { name = "seetapsych-lib", specifier = ">=0.0.3" },
     { name = "timm", marker = "extra == 'all'", specifier = ">=1.0.26" },
     { name = "timm", marker = "extra == 'dev'", specifier = ">=1.0.26" },
     { name = "torch", marker = "extra == 'all'", specifier = ">=2.9.1" },
@@ -3585,7 +3585,7 @@ dev = [
 
 [[package]]
 name = "seetapsych-lib"
-version = "0.0.2.post1"
+version = "0.0.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jsonschema2md" },
@@ -3597,9 +3597,9 @@ dependencies = [
     { name = "tomli" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/27/f5/52438ae6295575268b15f916d250579444aed0f0117593066caadbfcbf2a/seetapsych_lib-0.0.2.post1.tar.gz", hash = "sha256:f74848828e2026cc25aa7a55643ec83d55ab63cfd6f50811480799cf466643fc", size = 275169, upload-time = "2026-08-31T01:47:23.641Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/60/ef/85038fb3f8b068b47dcd99c0892e1c62cd6aada2c5ea59e22217fb9b00f1/seetapsych_lib-0.0.3.tar.gz", hash = "sha256:53b26f601c76787f22c61e94d23883768326224abae224a190c3c8b8edd9af64", size = 1915555, upload-time = "2026-09-02T19:51:53.198Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b4/0b/c3549db690a01cf4f0ed86b0893ef6c13394731c66edd3cbd42ca4199bdb/seetapsych_lib-0.0.2.post1-py3-none-any.whl", hash = "sha256:584044aaf9636bda31b624ff08db0b4349e8a6eeb35cec157fc54ad60fd93254", size = 76669, upload-time = "2026-08-31T01:47:22.207Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/92/9eec7ade9eb8d9e1d965fc01993c891522213faa3ba3b3b6fe04109750de/seetapsych_lib-0.0.3-py3-none-any.whl", hash = "sha256:fd6ee132ca7e73299bad41d557d28387dd055c3cc2767d86ccd71f82612adfa3", size = 84800, upload-time = "2026-09-02T19:51:51.405Z" },
 ]
 
 [[package]]
