@@ -76,6 +76,9 @@ Estimate screen gaze coordinates using the AFFNet[^1], which predicts a single g
 | `opengaze-affnet-v2.safetensors` | 2.0 | ✓ |
 | `opengaze-affnet.safetensors` | 1.0 |  |
 
+**Output Attributes**
+- `face/gaze_screen` — [spec](https://github.com/seetapsych/seetapsych-attributes#facegaze_screen).
+
 ### GazeScreen-TDGazeNet(OpenGaze)
 
 > Open-source gaze estimation toolkit providing screen gaze coordinates from facial landmarks or mesh.
@@ -102,6 +105,9 @@ High-accuracy gaze estimation via TdGazeNet with 3D face prior, camera intrinsic
 | Model | Recommended |
 |---|---|
 | `opengeze-tdgazenet.safetensors` | ✓ |
+
+**Output Attributes**
+- `face/gaze_screen` — [spec](https://github.com/seetapsych/seetapsych-attributes#facegaze_screen).
 
 ## data parameter reference
 
