@@ -12,7 +12,7 @@ from seetapsych_lib.runtime.parallel_runner import ParallelRunner as Runner
 from seetapsych_lib.runtime.pipeline import Pipeline
 
 override_modules = [
-    os.path.join(os.path.dirname(__file__), "../../seetapsych-gaze-screen/seetapsych_gaze_screen/modules"),
+    os.path.join(os.path.dirname(__file__), "../seetapsych_gaze_screen/modules"),
     os.path.join(os.path.dirname(__file__), "../../seetapsych-face-hub/seetapsych_face_hub/modules"),
 ]
 
