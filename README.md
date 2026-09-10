@@ -53,7 +53,7 @@ pipeline.add_attributes("face/gaze_screen")
 
 > Open-source gaze estimation toolkit providing screen gaze coordinates from facial landmarks or mesh.
 
-Module config: [affnet.yml](seetapsych_gaze_screen/modules/affnet.yml)
+Module config: [affnet.yml](https://github.com/seetapsych/seetapsych-gaze-screen/blob/main/seetapsych_gaze_screen/modules/affnet.yml)
 
 | Package | Provides | Requires |
 |---|---|---|
@@ -83,7 +83,7 @@ Estimate screen gaze coordinates using the AFFNet[^1], which predicts a single g
 
 > Open-source gaze estimation toolkit providing screen gaze coordinates from facial landmarks or mesh.
 
-Module config: [tdgazenet.yml](seetapsych_gaze_screen/modules/tdgazenet.yml)
+Module config: [tdgazenet.yml](https://github.com/seetapsych/seetapsych-gaze-screen/blob/main/seetapsych_gaze_screen/modules/tdgazenet.yml)
 
 | Package | Provides | Requires |
 |---|---|---|
