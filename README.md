@@ -42,6 +42,10 @@ pipeline = Pipeline(factory, ...)
 pipeline.add_attributes("face/gaze_screen")
 ```
 
+For complete end-to-end examples with visualization, see:
+
+* [examples/camera_gaze_screen.py](https://github.com/seetapsych/seetapsych-gaze-screen/blob/main/examples/camera_gaze_screen.py) — live-camera screen gaze estimation drawing gaze points on the screen plane.
+
 ### Module Catalog
 
 | Module YAML | Package Name |
