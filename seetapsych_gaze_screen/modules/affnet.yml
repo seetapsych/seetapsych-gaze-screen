@@ -22,6 +22,7 @@ module:
   refs:
     - name: open-gaze-estimation
       repo: https://github.com/seetapsych/open-gaze-estimation-2025-release
+      revision: hotfix
 packages:
   - uid: ee7b0a24-c4b3-470d-b095-9c606384d06e
     name: GazeScreen-AFFNet(OpenGaze)

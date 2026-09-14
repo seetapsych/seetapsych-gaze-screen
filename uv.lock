@@ -2864,7 +2864,7 @@ wheels = [
 [[package]]
 name = "open-gaze-estimation"
 version = "0.1.0"
-source = { git = "https://github.com/seetapsych/open-gaze-estimation-2025-release.git#7bc28081ab698679c9a2554ee0a242e3a29a6af5" }
+source = { git = "https://github.com/seetapsych/open-gaze-estimation-2025-release.git?branch=hotfix#fed96c9b6c783d708093ea59c544dfc7859c373a" }
 dependencies = [
     { name = "h5py" },
     { name = "kornia", version = "0.8.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -4207,7 +4207,7 @@ provides-extras = ["all", "dev"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "open-gaze-estimation", git = "https://github.com/seetapsych/open-gaze-estimation-2025-release.git" },
+    { name = "open-gaze-estimation", git = "https://github.com/seetapsych/open-gaze-estimation-2025-release.git?branch=hotfix" },
     { name = "seetapsych-gaze-screen", extras = ["dev"] },
 ]
 

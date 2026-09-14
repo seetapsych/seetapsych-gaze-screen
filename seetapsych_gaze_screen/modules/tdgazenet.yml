@@ -23,6 +23,7 @@ module:
   refs:
     - name: open-gaze-estimation
       repo: https://github.com/seetapsych/open-gaze-estimation-2025-release
+      revision: hotfix
 packages:
   - uid: 17c5187c-beb1-4e7d-a0a7-da2638d679bd
     name: GazeScreen-TDGazeNet(OpenGaze)
