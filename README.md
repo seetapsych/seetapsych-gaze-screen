@@ -2,6 +2,11 @@
 
 > Screen gaze estimation modules for SeetaPsych
 
+[简体中文](README_CN.md) | English
+
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](pyproject.toml)
+[![License](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE)
+
 ## Usage
 
 This project is already included in the seetapsych-lib default configuration. Download and use it via `seetapsych-manager download`.
@@ -44,7 +49,7 @@ pipeline.add_attributes("face/gaze_screen")
 
 For complete end-to-end examples with visualization, see:
 
-* [examples/camera_gaze_screen.py](https://github.com/seetapsych/seetapsych-gaze-screen/blob/main/examples/camera_gaze_screen.py) — live-camera screen gaze estimation drawing gaze points on the screen plane.
+* [examples/camera_gaze_screen.py](examples/camera_gaze_screen.py) — live-camera screen gaze estimation drawing gaze points on the screen plane.
 
 ### Module Catalog
 
@@ -57,7 +62,7 @@ For complete end-to-end examples with visualization, see:
 
 > Open-source gaze estimation toolkit providing screen gaze coordinates from facial landmarks or mesh.
 
-Module config: [affnet.yml](https://github.com/seetapsych/seetapsych-gaze-screen/blob/main/seetapsych_gaze_screen/modules/affnet.yml)
+Module config: [affnet.yml](seetapsych_gaze_screen/modules/affnet.yml)
 
 | Package | Provides | Requires |
 |---|---|---|
@@ -87,7 +92,7 @@ Estimate screen gaze coordinates using the AFFNet[^1], which predicts a single g
 
 > Open-source gaze estimation toolkit providing screen gaze coordinates from facial landmarks or mesh.
 
-Module config: [tdgazenet.yml](https://github.com/seetapsych/seetapsych-gaze-screen/blob/main/seetapsych_gaze_screen/modules/tdgazenet.yml)
+Module config: [tdgazenet.yml](seetapsych_gaze_screen/modules/tdgazenet.yml)
 
 | Package | Provides | Requires |
 |---|---|---|
@@ -129,7 +134,7 @@ Screen physical dimensions and pixel resolution are used to convert between came
 | `screen.h_mm` | float | `174` | Screen height in physical millimeters. |
 
 <div align="center" id="figure-resolution">
-  <img src="https://raw.githubusercontent.com/seetapsych/seetapsych-gaze-screen/main/assets/screen-resolution.jpg" alt="Screen physical dimensions and pixel resolution diagram" height="280">
+  <img src="assets/screen-resolution.jpg" alt="Screen physical dimensions and pixel resolution diagram" height="280">
   <p><em><strong>Figure 1.</strong> Screen physical dimensions and resolution — common to both Layout A and Layout B. The diagram shows where to measure <code>screen.w_mm</code> (active display width in mm), <code>screen.h_mm</code> (active display height in mm), and how <code>screen.w_px × screen.h_px</code> (e.g. 1920 × 1080 px) maps to the physical area. These four values determine the mm↔pixel conversion factor for projecting gaze points onto screen coordinates; incorrect values will shift the estimated gaze by a proportional scaling error. For TDGazeNet (Layout B), accurate screen dimensions are especially critical because the 3D-face-prior projection relies on the metric screen plane to intersect gaze rays.</em></p>
 </div>
 
@@ -158,7 +163,7 @@ Used by algorithms that estimate gaze in the camera coordinate frame directly, t
 | `camera.screen_y_mm` | float | `-5` | Vertical offset from the camera optical center to the screen origin, **in millimeters along the camera Y-axis**. Sign convention: **up = positive, down = negative**. With the webcam mounted on the top bezel the screen sits slightly below the camera, so this value is usually slightly negative or close to zero. |
 
 <div align="center" id="figure-layout-a">
-  <img src="https://raw.githubusercontent.com/seetapsych/seetapsych-gaze-screen/main/assets/screen-and-camera.jpg" alt="Layout A camera-to-screen offset diagram" height="320">
+  <img src="assets/screen-and-camera.jpg" alt="Layout A camera-to-screen offset diagram" height="320">
   <p><em><strong>Figure 2.</strong> Layout A — camera–screen geometry. The diagram illustrates how <code>camera.screen_x_mm</code> and <code>camera.screen_y_mm</code> measure the signed offset from the camera optical center to the screen origin <em>S</em> (top-left corner of the active display area), together with the screen physical dimensions <code>screen.w_mm</code>/<code>screen.h_mm</code> and pixel resolution used for mm↔px conversion. Use this as a visual reference when taking physical measurements for the AFFNet configuration.</em></p>
 </div>
 
