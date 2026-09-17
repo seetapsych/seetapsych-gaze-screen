@@ -64,7 +64,7 @@ For complete end-to-end examples with visualization, see:
 
 Module config: [affnet.yml](seetapsych_gaze_screen/modules/affnet.yml)
 
-| Package | Provides | Requires |
+| Package Name | Provides Attributes | Requires Attributes |
 |---|---|---|
 | GazeScreen-AFFNet(OpenGaze) | `face/gaze_screen` | `face/mesh` |
 
@@ -94,7 +94,7 @@ Estimate screen gaze coordinates using the AFFNet[^1], which predicts a single g
 
 Module config: [tdgazenet.yml](seetapsych_gaze_screen/modules/tdgazenet.yml)
 
-| Package | Provides | Requires |
+| Package Name | Provides Attributes | Requires Attributes |
 |---|---|---|
 | GazeScreen-TDGazeNet(OpenGaze) | `face/gaze_screen` | `face/mesh` |
 
