@@ -51,6 +51,8 @@ For complete end-to-end examples with visualization, see:
 
 * [examples/camera_gaze_screen.py](examples/camera_gaze_screen.py) — live-camera screen gaze estimation drawing gaze points on the screen plane.
 
+The camera example starts fullscreen. Press F to switch to a desktop-bounded window or back to fullscreen, and Esc, Q, or X to exit. The preview is fitted without cropping; window resizing scales only the visualization, not the screen/camera calibration. Configure the actual monitor geometry using the [data parameter reference](#data-parameter-reference).
+
 ### Module Catalog
 
 | Module YAML | Package Name |

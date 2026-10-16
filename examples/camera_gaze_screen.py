@@ -2,12 +2,16 @@
 
 import os
 import platform
+import time
+from typing import Any
 
 import cv2
 import numpy
+from camera_window import CameraWindow, draw_text, fit_canvas, fit_geometry
 from seetapsych_lib.runtime.factory import Factory
 
 # from seetapsych_lib.runtime.runner import Runner
+from seetapsych_lib.runtime.parallel.future import Future
 from seetapsych_lib.runtime.parallel_runner import ParallelRunner as Runner
 from seetapsych_lib.runtime.pipeline import Pipeline
 
@@ -18,6 +22,14 @@ override_modules = [
 
 
 def open_camera(camera_id: int = 0) -> cv2.VideoCapture:
+    """Open a camera with a platform backend and default-backend fallback.
+
+    Args:
+        camera_id: Camera device index.
+
+    Returns:
+        Capture whose open state must be checked by the caller.
+    """
     system = platform.system()
 
     backend = {
@@ -34,12 +46,15 @@ def open_camera(camera_id: int = 0) -> cv2.VideoCapture:
     return cap
 
 
-def deep_merge(base: dict, override: dict) -> dict:
-    """Recursively merge override into base, key by key.
+def deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+    """Merge nested overrides without discarding unrelated model settings.
 
-    For nested dicts (TOML sections), merge recursively so that only the
-    explicitly set keys in override replace those in base — other keys in
-    the same section are left untouched.
+    Args:
+        base: Original parameter mapping.
+        override: Values to replace, recursively merging nested mappings.
+
+    Returns:
+        New top-level mapping preserving unspecified keys.
     """
     result = base.copy()
     for key, value in override.items():
@@ -50,25 +65,30 @@ def deep_merge(base: dict, override: dict) -> dict:
     return result
 
 
-def render(dst: numpy.ndarray, src: numpy.ndarray):
+def render(dst: numpy.ndarray, src: numpy.ndarray) -> numpy.ndarray:
+    """Fit the entire preview without changing the screen-coordinate canvas.
+
+    Args:
+        dst: Screen-sized destination.
+        src: Camera preview.
+
+    Returns:
+        Destination with the complete preview centered and resized proportionally.
+    """
     dst_h, dst_w = dst.shape[:2]
     src_h, src_w = src.shape[:2]
-
-    data_h = min(src_h, dst_h)
-    data_w = min(src_w, dst_w)
-
-    to_h = max(0, (dst_h - src_h) // 2)
-    to_w = max(0, (dst_w - src_w) // 2)
-
-    from_h = max(0, (src_h - dst_h) // 2)
-    from_w = max(0, (src_w - dst_w) // 2)
-
-    dst[to_h : to_h + data_h, to_w : to_w + data_w] = src[from_h : from_h + data_h, from_w : from_w + data_w]
-
+    x, y, width, height = fit_geometry((src_w, src_h), (dst_w, dst_h))
+    interpolation = cv2.INTER_AREA if width < src_w else cv2.INTER_CUBIC
+    dst[y : y + height, x : x + width] = cv2.resize(src, (width, height), interpolation=interpolation)
     return dst
 
 
-def main():
+def run_camera(cap: cv2.VideoCapture) -> None:
+    """Run screen-gaze inference independently of camera rendering.
+
+    Args:
+        cap: Open camera owned by the caller.
+    """
     screen_localtion_in_camera_mm = (-270.0, 10.0)  # (x, y)
     screen_physical_size_mm = (540.0, 290.0)  # (width, height)
     original_screen_pixel_size = (1920, 1080)  # (width, height)
@@ -119,69 +139,108 @@ def main():
     assert package is not None
 
     parameter_data = next((p for p in (package.parameters or []) if p.name == "data"), None)
-    data_value: dict = parameter_data.value if parameter_data is not None else {}
-
-    data_value = deep_merge(data_value, screen_config)
+    parameter_value = parameter_data.value if parameter_data is not None else {}
+    if not isinstance(parameter_value, dict):
+        raise ValueError("The gaze package's data parameter must be a mapping.")
+    data_value = deep_merge(parameter_value, screen_config)
 
     pipeline.set_parameters(package.uid, {"data": data_value})
 
     runner = Runner(pipeline)
 
-    fullscreen = True
     window_name = "Gaze"
 
+    pending: Future[dict[str, Any]] | None = None
+    report: dict[str, Any] = {}
+    submitted_at = 0.0
+    result_at = 0.0
+    inference_fps = 0.0
+    try:
+        window = CameraWindow(window_name, screen_pixel_size, fullscreen=True)
+        while cap.isOpened():
+            ok, frame = cap.read()
+            if not ok:
+                print("Camera stopped delivering frames. Check the connection and camera permissions.")
+                break
+            now = time.monotonic()
+            if pending is not None and pending.done():
+                report = pending.get()
+                result_at = submitted_at
+                inference_fps = 1.0 / max(now - submitted_at, 1e-6)
+                pending = None
+            if pending is None:
+                submitted_at = now
+                pending = runner.run_async(data={"default": frame.copy()}, timestamp=time.time())
+
+            canvas = numpy.zeros((screen_pixel_size[1], screen_pixel_size[0], 3), dtype=numpy.uint8)
+            render(canvas, cv2.flip(frame, 1))
+            display_size = window.size()
+            offset_x, offset_y, display_width, display_height = fit_geometry(screen_pixel_size, display_size)
+            scale_x, scale_y = display_width / screen_pixel_size[0], display_height / screen_pixel_size[1]
+            canvas = fit_canvas(canvas, display_size)
+            result_ttl = max(1.0, 2.0 / max(inference_fps, 0.01))
+            face_gaze_screen = report.get("face_gaze_screen", []) if now - result_at < result_ttl else []
+            status = "Waiting for gaze / face not detected"
+            if face_gaze_screen:
+                gaze = face_gaze_screen[0]["gaze"]
+                if gaze["success"]:
+                    status = f"Inference: {inference_fps:.1f} FPS"
+                    for eye in ("left_eye", "right_eye"):
+                        point = gaze["gaze_screen_px"][eye]
+                        if numpy.isfinite(point).all():
+                            display_point = (round(offset_x + point[0] * scale_x), round(offset_y + point[1] * scale_y))
+                            cv2.circle(
+                                canvas,
+                                display_point,
+                                max(3, round(20 * min(scale_x, scale_y))),
+                                (0, 0, 255),
+                                -1,
+                                cv2.LINE_AA,
+                            )
+
+            ui_scale = min(display_size[0] / 1920, display_size[1] / 1080)
+            draw_text(
+                canvas,
+                "F = Fullscreen | Esc / Q / X = Exit",
+                (round(30 * ui_scale), round(60 * ui_scale)),
+                (255, 255, 255),
+                scale=0.8 * ui_scale,
+                thickness=max(1, round(2 * ui_scale)),
+            )
+            if not window.fullscreen:
+                status += " | Windowed preview; calibration unchanged"
+            draw_text(
+                canvas,
+                status,
+                (round(30 * ui_scale), round(100 * ui_scale)),
+                (0, 220, 255),
+                scale=0.7 * ui_scale,
+                thickness=max(1, round(2 * ui_scale)),
+            )
+            window.show(canvas)
+            key = cv2.waitKey(1) & 0xFF
+            if key in (27, ord("q"), ord("Q"), ord("x"), ord("X")):
+                break
+            if cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) < 1:
+                break
+            window.handle_key(key)
+    finally:
+        if pending is not None:
+            pending.cancel()
+        runner.dispose()
+
+
+def main() -> None:
+    """Open the camera before preparing models and release GUI resources on exit."""
     cap = open_camera(0)
-
-    while cap.isOpened():
-        ok = cap.grab()
-        if not ok:
-            break
-        ok, frame = cap.retrieve()
-        if not ok:
-            break
-        report = runner.run(data={"default": frame})
-
-        screen_shape = (screen_pixel_size[1], screen_pixel_size[0], 3)
-        canvas = numpy.zeros(screen_shape, dtype=numpy.uint8)
-        render(canvas, cv2.flip(frame, 1))
-
-        face_gaze_screen = report["face_gaze_screen"]
-        if face_gaze_screen:
-            first_person_gaze = face_gaze_screen[0]["gaze"]
-            success = first_person_gaze["success"]
-            gaze_screen_px = first_person_gaze["gaze_screen_px"]
-            # gaze_camera_mm = first_person_gaze['gaze_camera_mm']
-
-            if success:
-                cv2.circle(canvas, list(map(int, gaze_screen_px["left_eye"])), 20, (0, 0, 255), -1)
-                cv2.circle(canvas, list(map(int, gaze_screen_px["right_eye"])), 20, (0, 0, 255), -1)
-
-        if not cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE):
-            cv2.namedWindow(window_name, cv2.WINDOW_FULLSCREEN if fullscreen else cv2.WINDOW_NORMAL)
-
-        cv2.putText(canvas, "Press F to toggle fullscreen", (30, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 2)
-        cv2.putText(canvas, "Press Esc/Q/X to exit", (30, 120), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 2)
-
-        cv2.imshow(window_name, canvas)
-
-        key = cv2.waitKey(1)
-        if key == 27:
-            break
-
-        key &= 0xFF
-        if key in {ord("q"), ord("x")}:
-            break
-
-        if key == ord("f"):
-            fullscreen = not fullscreen
-
-            if fullscreen:
-                cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-            else:
-                cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_NORMAL)
-
-    if cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE):
-        cv2.destroyWindow(window_name)
+    try:
+        if not cap.isOpened():
+            print("Could not open camera 0. Check the device index, camera permissions, and other camera apps.")
+            return
+        run_camera(cap)
+    finally:
+        cap.release()
+        cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
